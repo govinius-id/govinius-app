@@ -1,0 +1,8 @@
+html.dark {
+  background-color: #23262e;
+}
+
+/* Fix tailwindcss html2canvas text shifting down */
+img {
+  display: inline-block !important;
+}
