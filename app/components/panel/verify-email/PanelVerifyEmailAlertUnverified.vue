@@ -3,7 +3,7 @@
     v-if="$auth().user?.email && !$auth().user?.is_email_verified"
     :title="$i18n().t('auth.email_verification.alert_unverified_title')"
     color="info"
-    icon="ph:info-fill"
+    icon="ph:seal-check-fill"
     class="mb-4"
   >
     <template #content>
@@ -16,10 +16,7 @@
       <BaseButton
         :loading="authVerifyEmailStore.loadingSubmitForm"
         size="sm"
-        :classes="{
-          color:
-            'bg-info text-white hover:bg-info/80 dark:bg-info-700 dark:hover:bg-info-700/80',
-        }"
+        color="info"
         @click="authVerifyEmailStore.onSubmitForm()"
       >
         {{ $i18n().t('common.verify_now') }}

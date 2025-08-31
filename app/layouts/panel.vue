@@ -1,7 +1,10 @@
 <template>
   <BaseLayoutPanel>
     <template #sidebar-header>
-      <BaseAppLogo class="w-12 min-w-12" />
+      <BaseAppLogo
+        :variant="$themeMode() === 'dark' ? 'white' : undefined"
+        class="w-10 min-w-10"
+      />
       <div class="grow"></div>
     </template>
     <template #sidebar-content="opts">

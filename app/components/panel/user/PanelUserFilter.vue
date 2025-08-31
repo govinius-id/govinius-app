@@ -1,5 +1,5 @@
 <template>
-  <BaseModalCard
+  <BaseAppModalResponsive
     v-model="panelUserListStore.isModalOpenFilter"
     :title="$i18n().t('common.filter')"
   >
@@ -36,7 +36,7 @@
         {{ $i18n().t('common.apply') }}
       </BaseButton>
     </template>
-  </BaseModalCard>
+  </BaseAppModalResponsive>
 </template>
 
 <script lang="ts" setup>

@@ -4,13 +4,15 @@
 
 <script lang="ts" setup>
 interface Props {
-  variant?: '';
+  variant?: 'white';
 }
 
 const props = withDefaults(defineProps<Props>(), {});
 
 const logoUrl = computed(() => {
   switch (props.variant) {
+    case 'white':
+      return '/images/logo/app-white.png';
     default:
       return '/images/logo/app.png';
   }

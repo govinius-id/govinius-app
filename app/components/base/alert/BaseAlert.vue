@@ -1,26 +1,28 @@
 <template>
   <div :class="alertClass">
-    <div class="flex gap-x-1">
-      <BaseIcon
-        v-if="props.icon"
-        :name="props.icon"
-        class="mt-1"
-        :class="props.classes?.icon"
-      />
+    <BaseIcon
+      v-if="props.icon"
+      :name="props.icon"
+      :class="props.classes?.icon"
+      class="mt-1"
+      size="lg"
+    />
+
+    <div class="flex flex-col">
       <BaseText tag="h3" class="font-semibold">
         {{ props.title }}
       </BaseText>
-    </div>
 
-    <div>
-      <slot name="content"></slot>
-    </div>
+      <div>
+        <slot name="content"></slot>
+      </div>
 
-    <div
-      v-if="$slots.action"
-      class="mt-3 flex flex-col items-stretch md:flex-row md:items-center"
-    >
-      <slot name="action"></slot>
+      <div
+        v-if="$slots.action"
+        class="mt-2 flex flex-col items-start md:flex-row md:items-center"
+      >
+        <slot name="action"></slot>
+      </div>
     </div>
   </div>
 </template>
@@ -41,9 +43,9 @@ const alertClass = computed(() => {
   const itemsClass: string[] = [];
 
   itemsClass.push('w-full');
-  itemsClass.push('flex flex-col');
+  itemsClass.push('flex');
   itemsClass.push('rounded-lg');
-  itemsClass.push('gap-1 py-2 px-3');
+  itemsClass.push('gap-2 py-2 px-3');
 
   switch (props.color) {
     case 'primary':
