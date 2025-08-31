@@ -16,6 +16,8 @@
 
         <div
           id="panel-sidebar-content"
+          data-aos="fade-right"
+          data-aos-duration="500"
           class="flex grow flex-col overflow-y-auto p-4"
         >
           <slot

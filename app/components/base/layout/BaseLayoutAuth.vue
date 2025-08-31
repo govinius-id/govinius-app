@@ -1,6 +1,6 @@
 <template>
   <div
-    class="dark:bg-dark-900/50 font-inter relative flex min-h-dvh w-full flex-col bg-white pb-[env(safe-area-inset-bottom)] xl:flex-row-reverse"
+    class="dark:bg-dark-900/50 font-inter bg-primary-100/50 relative flex min-h-dvh w-full flex-col overflow-hidden pb-[env(safe-area-inset-bottom)] xl:flex-row-reverse"
   >
     <div
       class="relative z-[1] h-56 w-full overflow-hidden md:h-96 xl:h-dvh xl:w-1/2"
@@ -16,6 +16,13 @@
           draggable="false"
         />
       </div>
+
+      <div
+        v-if="$slots['secondary-content']"
+        class="absolute right-0 top-0 flex h-full w-full items-center justify-center"
+      >
+        <slot name="secondary-content"></slot>
+      </div>
     </div>
 
     <div
@@ -28,7 +35,10 @@
         <slot name="header"></slot>
       </div>
 
-      <div class="flex grow justify-center px-5 py-10 xl:items-center">
+      <div
+        :data-aos="$breakpoint().is_xl_and_up ? 'fade-right' : 'fade-up'"
+        class="flex grow justify-center px-5 py-10 xl:items-center"
+      >
         <slot name="main-content"></slot>
       </div>
 

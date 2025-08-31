@@ -1,5 +1,5 @@
 <template>
-  <BaseLayoutAuth background-image="/images/background/login.webp">
+  <BaseLayoutAuth>
     <template #header>
       <BaseButtonIcon
         icon="ph:arrow-left"
@@ -15,6 +15,17 @@
     </template>
     <template #main-content>
       <slot></slot>
+    </template>
+    <template #secondary-content>
+      <img
+        :src="
+          $themeMode() === 'dark'
+            ? '/images/background/login-dark.svg'
+            : '/images/background/login-light.svg'
+        "
+        class="invisible h-auto w-2/3 xl:visible"
+        draggable="false"
+      />
     </template>
     <template #footer>
       <BaseAppCopyright />
