@@ -28,9 +28,6 @@ process.on('message', (options) => {
     fs.createReadStream(options.file_src_path)
       .pipe(sharpInstance.webp({ quality: 70 }))
       .pipe(fs.createWriteStream(tmpPath))
-      .on('ready', () => {
-        console.info(`Sharp compress image: processing image`);
-      })
       .on('close', async () => {
         global?.gc();
 

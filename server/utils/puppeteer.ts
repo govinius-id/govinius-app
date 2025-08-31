@@ -6,10 +6,6 @@ import type { PaperFormat } from 'puppeteer';
 
 const queue = new PQueue({ concurrency: 1 });
 
-queue.on('add', () => {
-  console.info(`Queue: ${queue.size} queued using puppeteer`);
-});
-
 export const $puppeteerGeneratePdf = async (options: {
   html: string;
   width?: string;

@@ -5,10 +5,6 @@ import PQueue from 'p-queue';
 
 const queue = new PQueue({ concurrency: 1 });
 
-queue.on('add', () => {
-  console.info(`Queue: ${queue.size} queued using sharp`);
-});
-
 export const $sharpCompressImage = async (options: {
   file_src_path: string;
   size?: 'sm' | 'md' | 'lg';

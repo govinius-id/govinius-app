@@ -17,8 +17,6 @@ process.on('message', async (options) => {
       timeout: 30000,
     });
 
-    console.info(`Puppeteer generate pdf: generating pdf`);
-
     await page.pdf({
       path: tmpPath,
       width: options.width,
