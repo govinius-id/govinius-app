@@ -1,0 +1,22 @@
+services:
+  web:
+    image: govinius-app
+    container_name: govinius-app
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./.env
+    volumes:
+      - ./storage:/app/.output/server/storage
+      - ./gcs-key.json:/app/gcs-key.json
+    networks:
+      - server-network
+
+networks:
+  server-network:
+    name: server-network
+    external: true
