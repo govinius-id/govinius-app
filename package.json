@@ -35,7 +35,6 @@
     "@tiptap/extension-placeholder": "3.3.0",
     "@tiptap/extension-strike": "3.3.0",
     "@tiptap/extension-text": "3.3.0",
-    "@tiptap/extension-text-style": "3.3.0",
     "@tiptap/extension-text-align": "3.3.0",
     "@tiptap/extension-underline": "3.3.0",
     "@tiptap/pm": "3.3.0",

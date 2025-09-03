@@ -65,7 +65,6 @@ import ExtensionPlaceholder from '@tiptap/extension-placeholder';
 import ExtensionStrike from '@tiptap/extension-strike';
 import ExtensionText from '@tiptap/extension-text';
 import ExtensionTextAlign from '@tiptap/extension-text-align';
-import ExtensionTextStyle from '@tiptap/extension-text-style';
 import ExtensionUnderline from '@tiptap/extension-underline';
 
 interface EditorButtonsItem {
@@ -132,7 +131,7 @@ const setEditorContent = () => {
   const isSame = editor.value?.getHTML() === inputModel.value;
 
   if (!isSame) {
-    editor.value?.commands.setContent(inputModel.value, false);
+    editor.value?.commands.setContent(inputModel.value, { emitUpdate: true });
   }
 };
 
@@ -156,7 +155,6 @@ const initEditor = () => {
       ExtensionStrike.configure(),
       ExtensionText.configure(),
       ExtensionTextAlign.configure({ types: ['heading', 'paragraph'] }),
-      ExtensionTextStyle.configure(),
       ExtensionPlaceholder.configure({
         placeholder: props.placeholder,
         emptyNodeClass:
