@@ -1,80 +1,53 @@
 export const usePanelUserListStore = defineStore('panelUserListStore', () => {
   // Search
-  const inputSearchDefault = {
-    search: null as string | null,
-  };
-  const inputSearch = reactive($objectClone(inputSearchDefault));
-
-  const onResetSearch = () => {
-    $objectAssignTarget(inputSearch, inputSearchDefault);
-  };
-
-  const timeoutSearch = ref();
-  watch(
-    () => inputSearch,
-    () => {
-      clearTimeout(timeoutSearch.value);
-      timeoutSearch.value = setTimeout(() => {
-        onResetPagination();
-        onFetchItemsUser();
-      }, 500);
+  const { inputSearch, onResetSearch } = useSearchState({
+    state: {
+      search: null as string | null,
     },
-    { deep: true },
-  );
+    onChange: () => {
+      onResetPagination();
+      onFetchItemsUser();
+    },
+  });
   //
 
   // Pagination
-  const inputPaginationDefault = {
-    page: 1,
-    per_page: 10,
-  };
-  const inputPagination = reactive($objectClone(inputPaginationDefault));
-
-  const onResetPagination = () => {
-    $objectAssignTarget(inputPagination, inputPaginationDefault);
-  };
-
-  watch(
-    () => inputPagination,
-    () => {
-      document.getElementById('app-top')?.scrollIntoView({
-        behavior: 'smooth',
-        inline: 'center',
-        block: 'nearest',
-      });
-      onFetchItemsUser();
-    },
-    { deep: true },
-  );
-
-  const getRowNumber = (index: number) => {
-    return (inputPagination.page - 1) * inputPagination.per_page + index + 1;
-  };
+  const { inputPagination, onResetPagination, getRowNumber } =
+    usePaginationState({
+      state: {
+        page: 1,
+        per_page: 10,
+      },
+      onChange: () => {
+        document.getElementById('app-top')?.scrollIntoView({
+          behavior: 'smooth',
+          inline: 'center',
+          block: 'nearest',
+        });
+        onFetchItemsUser();
+      },
+    });
   //
 
   // Filter
-  const isModalOpenFilter = ref(false);
-
-  const inputFilterDefault = {
-    role: null as string | null,
-    role_detail: null as ItemUserRole | null,
-    active_status: null as string | null,
-    active_status_detail: null as ItemActiveStatus | null,
-  };
-  const inputFilter = reactive($objectClone(inputFilterDefault));
-  const inputFilterPreview = ref($objectClone(inputFilterDefault));
-
-  const onResetFilter = () => {
-    $objectAssignNullable(inputFilter);
-    onApplyFilter();
-  };
-
-  const onApplyFilter = () => {
-    $objectAssignTarget(inputFilterPreview.value, inputFilter);
-    onResetPagination();
-    onFetchItemsUser();
-    isModalOpenFilter.value = false;
-  };
+  const {
+    isModalOpenFilter,
+    inputFilter,
+    inputFilterPreview,
+    onResetFilter,
+    onApplyFilter,
+  } = useFilterState({
+    state: {
+      role: null as string | null,
+      role_detail: null as ItemUserRole | null,
+      active_status: null as string | null,
+      active_status_detail: null as ItemActiveStatus | null,
+    },
+    onApply: () => {
+      onResetPagination();
+      onFetchItemsUser();
+    },
+  });
   //
 
   const itemsUser = ref<ItemUser[]>([]);

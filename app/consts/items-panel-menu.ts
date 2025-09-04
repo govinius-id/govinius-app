@@ -39,7 +39,7 @@ export const constItemsPanelOtherMenu = () => {
       icon: 'ph:gear-duotone',
       active: $isActiveRoute('/panel/setting'),
       roles: [],
-      permissions: ['USER_LIST'],
+      permissions: ['SETTING_LIST'],
     },
   ] as BaseMenuItem[];
 

@@ -8,8 +8,6 @@ definePageMeta({
   middleware: ['auth-required'],
 });
 
-const route = useRoute();
-
 $breadcrumb().setItems([
   {
     icon: 'ph:house',
@@ -21,7 +19,7 @@ $breadcrumb().setItems([
   },
   {
     text: $i18n().t('common.detail'),
-    to: `/panel/user/${route.params.user_id}/detail`,
+    to: `/panel/user/${useRoute().params.user_id}/detail`,
   },
 ]);
 

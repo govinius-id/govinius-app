@@ -5,36 +5,31 @@ export const usePanelUserFormStore = defineStore('panelUserFormStore', () => {
     return $isNotEmpty(panelUserDetailStore.getUserId());
   };
 
-  const inputFormDefault = {
-    name: null as string | null,
-    username: null as string | null,
-    email: null as string | null,
-    password: null as string | null,
-    role: null as string | null,
-    role_detail: null as ItemUserRole | null,
-    is_active: true,
-    picture: null as string | null,
-    file_picture: null as File | null,
-  };
-  const inputForm = reactive($objectClone(inputFormDefault));
-
-  const onResetForm = () => {
-    errorForm.value = null;
-    itemUser.value = null;
-    $objectAssignTarget(inputForm, inputFormDefault);
-  };
-
-  const errorForm = ref<Record<string, any> | null>(null);
-  const onValidateForm = () => {
-    errorForm.value = $validateInput(inputForm, {
-      name: ['is_not_empty'],
-      username: ['is_not_empty'],
-      email: inputForm.email ? ['is_email'] : [],
-      password: !isEditing() ? ['is_not_empty'] : [],
-      role: ['is_not_empty'],
-    });
-    return $validateErrorMessage(errorForm.value);
-  };
+  const { inputForm, errorForm, onResetForm, onValidateForm } = useFormState({
+    state: {
+      name: null as string | null,
+      username: null as string | null,
+      email: null as string | null,
+      password: null as string | null,
+      role: null as string | null,
+      role_detail: null as ItemUserRole | null,
+      is_active: true,
+      picture: null as string | null,
+      file_picture: null as File | null,
+    },
+    onReset: () => {
+      itemUser.value = null;
+    },
+    onValidate: () => {
+      errorForm.value = $validateInput(inputForm, {
+        name: ['is_not_empty'],
+        username: ['is_not_empty'],
+        email: inputForm.email ? ['is_email'] : [],
+        password: !isEditing() ? ['is_not_empty'] : [],
+        role: ['is_not_empty'],
+      });
+    },
+  });
 
   const loadingSubmitForm = ref(false);
   const onSubmitForm = async () => {
