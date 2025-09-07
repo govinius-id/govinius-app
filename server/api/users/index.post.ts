@@ -10,7 +10,8 @@ export default defineEventHandler({
 
     const errorForm = $validateInput(event, payload, {
       name: ['is_not_empty'],
-      email: ['is_not_empty', 'is_email'],
+      username: ['is_not_empty'],
+      email: payload.email ? ['is_email'] : [],
       password: ['is_not_empty'],
       role: ['is_not_empty'],
     });
