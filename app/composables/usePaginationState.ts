@@ -1,5 +1,10 @@
+interface PaginationState {
+  page: number;
+  per_page: number;
+}
+
 interface Options {
-  state: Record<any, any>;
+  state: PaginationState;
   onChange?: () => void;
 }
 

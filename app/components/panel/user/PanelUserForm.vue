@@ -2,7 +2,7 @@
   <BaseCard bordered>
     <BaseCardHead
       :title="
-        panelUserFormStore.isEditing()
+        isEditing()
           ? $i18n().t('common.edit_value', {
               value: $i18n().t('common.user'),
             })
@@ -17,14 +17,14 @@
       </template>
       <template #suffix>
         <BaseTooltip
-          v-if="panelUserFormStore.isEditing()"
+          v-if="isEditing()"
           :text="$i18n().t('common.refresh')"
           position="bottom"
         >
           <BaseButtonIcon
             icon="ph:arrow-clockwise"
-            :loading="panelUserFormStore.loadingItemUser"
-            @click="panelUserFormStore.onFetchItemUser()"
+            :loading="loadingItemUser"
+            @click="onFetchItemUser()"
           />
         </BaseTooltip>
       </template>
@@ -32,18 +32,18 @@
 
     <div class="flex w-full flex-col gap-y-4 md:max-w-96">
       <BaseInputImage
-        v-model="panelUserFormStore.inputForm.picture"
-        v-model:file="panelUserFormStore.inputForm.file_picture"
+        v-model="inputForm.picture"
+        v-model:file="inputForm.file_picture"
         :label="$i18n().t('common.profile_picture')"
-        :preview="panelUserFormStore.itemUser?.picture_url"
-        :loading="panelUserFormStore.loadingItemUser"
+        :preview="itemUser?.picture_url"
+        :loading="loadingItemUser"
         :allow-extensions="['jpg', 'jpeg', 'png', 'webp']"
         max-size="10MB"
         min-size="1KB"
       >
         <template #image="opts">
           <BaseInputImageCropperHeadless
-            v-model="panelUserFormStore.inputForm.file_picture"
+            v-model="inputForm.file_picture"
             :label="$i18n().t('common.profile_picture')"
             @on-remove="opts.onRemove"
           >
@@ -53,9 +53,9 @@
       </BaseInputImage>
 
       <BaseInput
-        v-model="panelUserFormStore.inputForm.name"
-        :error="panelUserFormStore.errorForm?.name"
-        :loading="panelUserFormStore.loadingItemUser"
+        v-model="inputForm.name"
+        :error="errorForm?.name"
+        :loading="loadingItemUser"
         :label="$i18n().t('common.name')"
         :placeholder="
           $i18n().t('common.enter_value', {
@@ -67,9 +67,9 @@
       />
 
       <BaseInput
-        v-model="panelUserFormStore.inputForm.username"
-        :error="panelUserFormStore.errorForm?.username"
-        :loading="panelUserFormStore.loadingItemUser"
+        v-model="inputForm.username"
+        :error="errorForm?.username"
+        :loading="loadingItemUser"
         :label="$i18n().t('common.username')"
         :placeholder="
           $i18n().t('common.enter_value', {
@@ -83,9 +83,9 @@
       />
 
       <BaseInput
-        v-model="panelUserFormStore.inputForm.email"
-        :error="panelUserFormStore.errorForm?.email"
-        :loading="panelUserFormStore.loadingItemUser"
+        v-model="inputForm.email"
+        :error="errorForm?.email"
+        :loading="loadingItemUser"
         :label="$i18n().t('common.email')"
         :placeholder="
           $i18n().t('common.enter_value', {
@@ -97,40 +97,40 @@
       />
 
       <BaseInputPassword
-        v-model="panelUserFormStore.inputForm.password"
-        :error="panelUserFormStore.errorForm?.password"
-        :loading="panelUserFormStore.loadingItemUser"
-        :clearable="panelUserFormStore.isEditing()"
+        v-model="inputForm.password"
+        :error="errorForm?.password"
+        :loading="loadingItemUser"
+        :clearable="isEditing()"
         :label="
-          panelUserFormStore.isEditing()
+          isEditing()
             ? $i18n().t('common.new_password')
             : $i18n().t('common.password')
         "
         :placeholder="
           $i18n().t('common.enter_value', {
-            value: panelUserFormStore.isEditing()
+            value: isEditing()
               ? $i18n().t('common.new_password').toLowerCase()
               : $i18n().t('common.password').toLowerCase(),
           })
         "
-        :label-required="!panelUserFormStore.isEditing()"
-        :label-optional="panelUserFormStore.isEditing()"
+        :label-required="!isEditing()"
+        :label-optional="isEditing()"
         class="w-full"
-        @clear="panelUserFormStore.inputForm.password = null"
+        @clear="inputForm.password = null"
       />
 
       <SelectableUserRole
-        v-model="panelUserFormStore.inputForm.role"
-        v-model:item="panelUserFormStore.inputForm.role_detail"
-        :error="panelUserFormStore.errorForm?.role"
-        :loading="panelUserFormStore.loadingItemUser"
+        v-model="inputForm.role"
+        v-model:item="inputForm.role_detail"
+        :error="errorForm?.role"
+        :loading="loadingItemUser"
         :label="$i18n().t('common.role')"
         class="w-full"
         label-required
       />
 
       <BaseTextLabelContent :label="$i18n().t('common.active')">
-        <BaseInputToggle v-model="panelUserFormStore.inputForm.is_active" />
+        <BaseInputToggle v-model="inputForm.is_active" />
       </BaseTextLabelContent>
     </div>
 
@@ -138,8 +138,8 @@
       <BaseButton
         icon-prefix="ph:check-circle-duotone"
         color="primary"
-        :loading="panelUserFormStore.loadingSubmitForm"
-        @click="panelUserFormStore.onSubmitForm()"
+        :loading="loadingSubmitForm"
+        @click="onSubmitForm()"
       >
         {{ $i18n().t('common.save') }}
       </BaseButton>
@@ -148,13 +148,84 @@
 </template>
 
 <script lang="ts" setup>
-const panelUserFormStore = usePanelUserFormStore();
+const isEditing = () => {
+  return $isNotEmpty(useRoute().params.user_id);
+};
+
+const { inputForm, errorForm, onResetForm, onValidateForm } = useFormState({
+  state: {
+    name: null as string | null,
+    username: null as string | null,
+    email: null as string | null,
+    password: null as string | null,
+    role: null as string | null,
+    role_detail: null as ItemUserRole | null,
+    is_active: true,
+    picture: null as string | null,
+    file_picture: null as File | null,
+  },
+  onReset: () => {
+    itemUser.value = null;
+  },
+  onValidate: () => {
+    errorForm.value = $validateInput(inputForm, {
+      name: ['is_not_empty'],
+      username: ['is_not_empty'],
+      email: inputForm.email ? ['is_email'] : [],
+      password: !isEditing() ? ['is_not_empty'] : [],
+      role: ['is_not_empty'],
+    });
+  },
+});
+
+const { loadingSubmit: loadingSubmitForm, onSubmit: onSubmitForm } =
+  useSubmitState({
+    onBeforeSubmit: async () => {
+      return onValidateForm();
+    },
+    onSubmit: () => {
+      if (isEditing()) {
+        return $axios().put(
+          `/users/${useRoute().params.user_id}`,
+          $createFormData(inputForm),
+        );
+      } else {
+        return $axios().post('/users', $createFormData(inputForm));
+      }
+    },
+    onSuccess: (res) => {
+      $toast().open({
+        type: 'success',
+        message: $i18n().t('message.success_saved'),
+      });
+      if (res.statusCode === 200) {
+        onFetchItemUser();
+      } else if (res.statusCode === 201) {
+        navigateTo('/panel/user');
+      }
+    },
+  });
+
+const {
+  itemDetail: itemUser,
+  loadingItemDetail: loadingItemUser,
+  onFetchItemDetail: onFetchItemUser,
+} = useFetchDetailState({
+  state: null as ItemUser | null,
+  onFetch: () => {
+    return $axios().get(`/users/${useRoute().params.user_id}`);
+  },
+  onSuccess: (res) => {
+    itemUser.value = res.data;
+    $objectAssignTarget(inputForm, res.data);
+  },
+});
 
 onMounted(() => {
-  panelUserFormStore.onResetForm();
+  onResetForm();
 
-  if (panelUserFormStore.isEditing()) {
-    panelUserFormStore.onFetchItemUser();
+  if (isEditing()) {
+    onFetchItemUser();
   }
 });
 </script>

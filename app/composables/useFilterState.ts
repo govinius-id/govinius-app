@@ -1,9 +1,9 @@
-interface Options {
-  state: Record<any, any>;
+interface Options<T extends object> {
+  state: T;
   onApply?: () => void;
 }
 
-export const useFilterState = (opts: Options) => {
+export const useFilterState = <T extends object>(opts: Options<T>) => {
   const isModalOpenFilter = ref(false);
 
   const inputFilterDefault = opts.state;

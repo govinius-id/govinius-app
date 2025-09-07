@@ -96,7 +96,6 @@ const onLogout = () => {
 
 const onOpenLightbox = () => {
   if (!$auth().user?.picture_url) return;
-
   $lightbox().open(
     [
       {

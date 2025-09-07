@@ -87,42 +87,20 @@ export const usePanelUserListStore = defineStore('panelUserListStore', () => {
     loadingItemsUser.value = false;
   };
 
-  const onDeleteItemUser = (obj: ItemUser) => {
-    $dialog().open({
-      type: 'confirm',
-      title: $i18n().t('common.delete'),
-      message: $i18n().t('message.before_delete'),
-      icon: 'ph:trash',
-      textOk: $i18n().t('common.delete'),
-      colorOk: 'danger',
-      classes: {
-        icon: 'size-10 text-danger',
-      },
-      onOk: async () => {
-        const res: ApiResponse = await $axios().delete(`/users/${obj.id}`);
-
-        if (res.statusCode === 200) {
-          $dialog().close();
-          $toast().open({
-            type: 'success',
-            message: $i18n().t('message.success_deleted'),
-          });
-          if (useRoute().path === '/panel/user') {
-            onFetchItemsUser({
-              loading: false,
-            });
-          } else {
-            navigateTo('/panel/user', { replace: true });
-          }
-        } else {
-          $toast().open({
-            type: 'error',
-            message: $apiErrorMessage(res),
-          });
-        }
-      },
-    });
-  };
+  const { onDeleteItem: onDeleteItemUser } = useDeleteItemState({
+    onDelete: async (obj: ItemUser) => {
+      return $axios().delete(`/users/${obj.id}`);
+    },
+    onSuccess: () => {
+      if (useRoute().path === '/panel/user') {
+        onFetchItemsUser({
+          loading: false,
+        });
+      } else {
+        navigateTo('/panel/user', { replace: true });
+      }
+    },
+  });
 
   return {
     isModalOpenFilter,

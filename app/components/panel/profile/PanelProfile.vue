@@ -110,7 +110,6 @@ const onFetchItemProfile = async () => {
 
 const onOpenLightbox = () => {
   if (!itemProfile.value?.picture_url) return;
-
   $lightbox().open(
     [
       {

@@ -10,8 +10,8 @@
         <BaseTooltip :text="$i18n().t('common.refresh')" position="bottom">
           <BaseButtonIcon
             icon="ph:arrow-clockwise"
-            :loading="panelUserListStore.loadingItemsUser"
-            @click="panelUserListStore.onFetchItemsUser()"
+            :loading="loadingItemsUser"
+            @click="onFetchItemsUser()"
           />
         </BaseTooltip>
       </template>
@@ -19,8 +19,8 @@
 
     <div class="flex flex-col gap-y-5">
       <BaseAppSearchFilterAction
-        v-model:input-search="panelUserListStore.inputSearch.search"
-        v-model:modal-filter="panelUserListStore.isModalOpenFilter"
+        v-model:input-search="inputSearch.search"
+        v-model:modal-filter="isModalOpenFilter"
       >
         <template #action>
           <BaseButton
@@ -36,7 +36,7 @@
       </BaseAppSearchFilterAction>
 
       <BaseAppFilterPreview
-        v-if="$isActiveFilter(panelUserListStore.inputFilterPreview)"
+        v-if="$isActiveFilter(inputFilterPreview)"
         :items="itemsFilterPreview"
       >
         <template #role="opts">
@@ -52,10 +52,7 @@
         </template>
       </BaseAppFilterPreview>
 
-      <BaseTable
-        :loading="panelUserListStore.loadingItemsUser"
-        :is-empty="panelUserListStore.itemsUser.length === 0"
-      >
+      <BaseTable :loading="loadingItemsUser" :is-empty="itemsUser.length === 0">
         <template #heading>
           <BaseTableHeading align="center" width-fit> # </BaseTableHeading>
           <BaseTableHeading align="left" min-width="200px">
@@ -82,13 +79,10 @@
         </template>
 
         <template #body>
-          <BaseTableRow
-            v-for="(obj, i) in panelUserListStore.itemsUser"
-            :key="i"
-          >
+          <BaseTableRow v-for="(obj, i) in itemsUser" :key="i">
             <BaseTableCell align="center">
               <BaseText class="text-sm">
-                {{ panelUserListStore.getRowNumber(i) }}
+                {{ getRowNumber(i) }}
               </BaseText>
             </BaseTableCell>
             <BaseTableCell align="left" :to="`/panel/user/${obj.id}/detail`">
@@ -202,7 +196,7 @@
                     color:
                       'text-danger hover:bg-danger-50 dark:hover:bg-danger/10',
                   }"
-                  @click="panelUserListStore.onDeleteItemUser(obj)"
+                  @click="onDeleteItemUser(obj)"
                 />
               </BaseDropdownAction>
             </BaseTableCell>
@@ -211,34 +205,109 @@
       </BaseTable>
 
       <BasePagination
-        v-model:page="panelUserListStore.inputPagination.page"
-        v-model:per-page="panelUserListStore.inputPagination.per_page"
-        :total-data="panelUserListStore.totalUser"
+        v-model:page="inputPagination.page"
+        v-model:per-page="inputPagination.per_page"
+        :total-data="totalUser"
       />
     </div>
   </BaseCard>
 </template>
 
 <script lang="ts" setup>
-const panelUserListStore = usePanelUserListStore();
 const selectableConstStore = useSelectableConstStore();
+
+const { inputSearch } = useSearchState({
+  state: {
+    search: null as string | null,
+  },
+  onChange: () => {
+    onResetPagination();
+    onFetchItemsUser();
+  },
+});
+
+const { inputPagination, onResetPagination, getRowNumber } = usePaginationState(
+  {
+    state: {
+      page: 1,
+      per_page: 10,
+    },
+    onChange: () => {
+      document.getElementById('app-top')?.scrollIntoView({
+        behavior: 'smooth',
+        inline: 'center',
+        block: 'nearest',
+      });
+      onFetchItemsUser();
+    },
+  },
+);
+
+const { isModalOpenFilter, inputFilter, inputFilterPreview } = useFilterState({
+  state: {
+    role: null as string | null,
+    role_detail: null as ItemUserRole | null,
+    active_status: null as string | null,
+    active_status_detail: null as ItemActiveStatus | null,
+  },
+  onApply: () => {
+    onResetPagination();
+    onFetchItemsUser();
+  },
+});
 
 const itemsFilterPreview = computed(() => {
   return [
     {
       key: 'role',
       label: $i18n().t('common.role'),
-      item: panelUserListStore.inputFilterPreview.role_detail,
+      item: inputFilterPreview.role_detail,
     },
     {
       key: 'active',
       label: $i18n().t('common.active'),
-      item: panelUserListStore.inputFilterPreview.active_status_detail,
+      item: inputFilterPreview.active_status_detail,
     },
   ];
 });
 
+const {
+  itemsList: itemsUser,
+  loadingItemsList: loadingItemsUser,
+  total: totalUser,
+  onFetchItemsList: onFetchItemsUser,
+} = useFetchListState({
+  state: [] as ItemUser[],
+  onFetch: async () => {
+    return $axios().get('/users', {
+      params: {
+        ...inputSearch,
+        ...inputPagination,
+        ...$objectOmitKeys(inputFilter, [
+          'active_status_detail',
+          'role_detail',
+        ]),
+      },
+    });
+  },
+  onSuccess: (res) => {
+    itemsUser.value = res.data.rows;
+    totalUser.value = res.data.count;
+  },
+});
+
+const { onDeleteItem: onDeleteItemUser } = useDeleteItemState({
+  onDelete: async (obj: ItemUser) => {
+    return $axios().delete(`/users/${obj.id}`);
+  },
+  onSuccess: () => {
+    onFetchItemsUser({
+      loading: false,
+    });
+  },
+});
+
 onMounted(() => {
-  panelUserListStore.onFetchItemsUser();
+  onFetchItemsUser();
 });
 </script>

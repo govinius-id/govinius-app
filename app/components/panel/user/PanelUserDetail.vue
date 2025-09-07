@@ -13,17 +13,17 @@
       </template>
       <template #suffix>
         <div class="flex items-center gap-x-2">
-          <BaseDropdownAction v-if="panelUserDetailStore.itemUser">
+          <BaseDropdownAction v-if="itemUser">
             <BaseDropdownActionItem
               v-if="$userPermissionMatch(['USER_UPDATE'])"
               :text="$i18n().t('common.role_permission')"
-              :to="`/panel/user/${panelUserDetailStore.itemUser?.id}/role-permission`"
+              :to="`/panel/user/${itemUser?.id}/role-permission`"
               icon="ph:key"
             />
             <BaseDropdownActionItem
               v-if="$userPermissionMatch(['USER_UPDATE'])"
               :text="$i18n().t('common.edit')"
-              :to="`/panel/user/${panelUserDetailStore.itemUser?.id}/edit`"
+              :to="`/panel/user/${itemUser?.id}/edit`"
               icon="ph:pencil"
             />
             <BaseDropdownActionItem
@@ -33,28 +33,21 @@
               :classes="{
                 color: 'text-danger hover:bg-danger-50 dark:hover:bg-danger/10',
               }"
-              @click="
-                panelUserListStore.onDeleteItemUser(
-                  panelUserDetailStore.itemUser,
-                )
-              "
+              @click="onDeleteItemUser(itemUser)"
             />
           </BaseDropdownAction>
           <BaseTooltip :text="$i18n().t('common.refresh')" position="bottom">
             <BaseButtonIcon
               icon="ph:arrow-clockwise"
-              :loading="panelUserDetailStore.loadingItemUser"
-              @click="panelUserDetailStore.onFetchItemUser()"
+              :loading="loadingItemUser"
+              @click="onFetchItemUser()"
             />
           </BaseTooltip>
         </div>
       </template>
     </BaseCardHead>
 
-    <div
-      v-if="panelUserDetailStore.loadingItemUser"
-      class="flex flex-col gap-y-5 md:max-w-96"
-    >
+    <div v-if="loadingItemUser" class="flex flex-col gap-y-5 md:max-w-96">
       <BaseLoadingLabelAndAvatar />
       <BaseLoadingLabelAndText />
       <BaseLoadingLabelAndText />
@@ -66,10 +59,10 @@
     <div v-else class="flex flex-col gap-y-4 md:max-w-96">
       <BaseTextLabelContent :label="$i18n().t('common.profile_picture')">
         <BaseImageAvatar
-          :src="panelUserDetailStore.itemUser?.picture_url"
+          :src="itemUser?.picture_url"
           size="3xl"
           :class="{
-            'cursor-zoom-in': panelUserDetailStore.itemUser?.picture_url,
+            'cursor-zoom-in': itemUser?.picture_url,
           }"
           @click="onOpenLightbox()"
         />
@@ -77,28 +70,28 @@
 
       <BaseTextLabelContent :label="$i18n().t('common.name')">
         <BaseText>
-          {{ panelUserDetailStore.itemUser?.name || '-' }}
+          {{ itemUser?.name || '-' }}
         </BaseText>
       </BaseTextLabelContent>
 
       <BaseTextLabelContent :label="$i18n().t('common.username')">
         <BaseTextCopyable
-          :text="panelUserDetailStore.itemUser?.username"
+          :text="itemUser?.username"
           :text-name="$i18n().t('common.username')"
         >
-          {{ panelUserDetailStore.itemUser?.username }}
+          {{ itemUser?.username }}
         </BaseTextCopyable>
       </BaseTextLabelContent>
 
       <BaseTextLabelContent :label="$i18n().t('common.email')">
         <div class="inline-flex flex-nowrap items-center gap-x-1">
           <BaseText>
-            {{ panelUserDetailStore.itemUser?.email || '-' }}
+            {{ itemUser?.email || '-' }}
           </BaseText>
           <BaseTooltip
-            v-if="panelUserDetailStore.itemUser?.email"
+            v-if="itemUser?.email"
             :text="
-              panelUserDetailStore.itemUser?.is_email_verified
+              itemUser?.is_email_verified
                 ? $i18n().t('common.verified')
                 : $i18n().t('common.unverified')
             "
@@ -106,10 +99,8 @@
             <BaseIcon
               name="ph:seal-check-fill"
               :class="{
-                'text-success size-4':
-                  panelUserDetailStore.itemUser?.is_email_verified,
-                'size-4 text-slate-400':
-                  !panelUserDetailStore.itemUser?.is_email_verified,
+                'text-success size-4': itemUser?.is_email_verified,
+                'size-4 text-slate-400': !itemUser?.is_email_verified,
               }"
             />
           </BaseTooltip>
@@ -118,7 +109,7 @@
 
       <BaseTextLabelContent :label="$i18n().t('common.role')">
         <BaseText>
-          {{ panelUserDetailStore.itemUser?.role_detail?.text || '-' }}
+          {{ itemUser?.role_detail?.text || '-' }}
         </BaseText>
       </BaseTextLabelContent>
 
@@ -129,7 +120,7 @@
           :color="
             $arrayFindObjectValue(
               selectableConstStore.itemConst.items_active_status,
-              panelUserDetailStore.itemUser?.is_active ? 'ACTIVE' : 'INACTIVE',
+              itemUser?.is_active ? 'ACTIVE' : 'INACTIVE',
               'value',
               'color',
             )
@@ -139,7 +130,7 @@
           {{
             $arrayFindObjectValue(
               selectableConstStore.itemConst.items_active_status,
-              panelUserDetailStore.itemUser?.is_active ? 'ACTIVE' : 'INACTIVE',
+              itemUser?.is_active ? 'ACTIVE' : 'INACTIVE',
               'value',
               'text',
             )
@@ -152,17 +143,37 @@
 
 <script lang="ts" setup>
 const selectableConstStore = useSelectableConstStore();
-const panelUserDetailStore = usePanelUserDetailStore();
-const panelUserListStore = usePanelUserListStore();
+
+const {
+  itemDetail: itemUser,
+  loadingItemDetail: loadingItemUser,
+  onFetchItemDetail: onFetchItemUser,
+} = useFetchDetailState({
+  state: null as ItemUser | null,
+  onFetch: () => {
+    return $axios().get(`/users/${useRoute().params.user_id}`);
+  },
+  onSuccess: (res) => {
+    itemUser.value = res.data;
+  },
+});
+
+const { onDeleteItem: onDeleteItemUser } = useDeleteItemState({
+  onDelete: async (obj: ItemUser) => {
+    return $axios().delete(`/users/${obj.id}`);
+  },
+  onSuccess: () => {
+    navigateTo('/panel/user', { replace: true });
+  },
+});
 
 const onOpenLightbox = () => {
-  if (!panelUserDetailStore.itemUser?.picture_url) return;
-
+  if (!itemUser.value?.picture_url) return;
   $lightbox().open(
     [
       {
         name: $i18n().t('common.profile_picture'),
-        url: panelUserDetailStore.itemUser.picture_url,
+        url: itemUser.value.picture_url,
       },
     ],
     0,
@@ -170,6 +181,6 @@ const onOpenLightbox = () => {
 };
 
 onMounted(() => {
-  panelUserDetailStore.onFetchItemUser();
+  onFetchItemUser();
 });
 </script>

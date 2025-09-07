@@ -23,13 +23,6 @@ export const $breadcrumb = () => {
   };
 };
 
-export const $bottombar = () => {
-  const baseBottombarStore = useBaseBottombarStore();
-  return {
-    show: baseBottombarStore.showBottombar,
-  };
-};
-
 export const $lightbox = () => {
   const baseLightboxStore = useBaseLightboxStore();
   return {

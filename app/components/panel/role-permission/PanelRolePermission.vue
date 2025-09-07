@@ -89,43 +89,36 @@ watch(
   },
 );
 
-const loadingSubmitForm = ref(false);
-const onSubmitForm = async () => {
-  if (!onValidateForm()) return;
-  if (loadingSubmitForm.value) return;
-
-  loadingSubmitForm.value = true;
-
-  const res: ApiResponse = await $axios().patch('/role-permissions', inputForm);
-
-  if (res.statusCode === 200) {
-    $toast().open({
-      type: 'success',
-      message: $i18n().t('message.success_updated'),
-    });
-    onFetchItemRolePermission();
-  } else {
-    $toast().open({
-      type: 'error',
-      message: $apiErrorMessage(res),
-    });
-  }
-
-  loadingSubmitForm.value = false;
-};
-
-const itemRolePermission = ref<ItemRolePermission | null>(null);
-const loadingItemRolePermission = ref(false);
-const onFetchItemRolePermission = async () => {
-  loadingItemRolePermission.value = true;
-
-  const res: ApiResponse = await $axios().get(`/role-permissions`, {
-    params: {
-      role: inputForm.role,
+const { loadingSubmit: loadingSubmitForm, onSubmit: onSubmitForm } =
+  useSubmitState({
+    onBeforeSubmit: async () => {
+      return onValidateForm();
+    },
+    onSubmit: async () => {
+      return $axios().patch('/role-permissions', inputForm);
+    },
+    onSuccess: () => {
+      $toast().open({
+        type: 'success',
+        message: $i18n().t('message.success_saved'),
+      });
+      onFetchItemRolePermission();
     },
   });
 
-  if (res.statusCode === 200) {
+const {
+  itemDetail: itemRolePermission,
+  onFetchItemDetail: onFetchItemRolePermission,
+} = useFetchDetailState({
+  state: null as ItemRolePermission | null,
+  onFetch: () => {
+    return $axios().get(`/role-permissions`, {
+      params: {
+        role: inputForm.role,
+      },
+    });
+  },
+  onSuccess: (res) => {
     itemRolePermission.value = res.data;
     if (res.data) {
       $objectAssignTarget(inputForm, res.data);
@@ -133,15 +126,8 @@ const onFetchItemRolePermission = async () => {
       inputForm.id = null;
       inputForm.permissions = [];
     }
-  } else {
-    $toast().open({
-      type: 'error',
-      message: $apiErrorMessage(res),
-    });
-  }
-
-  loadingItemRolePermission.value = false;
-};
+  },
+});
 
 const isChecked = (permissionKey: string) => {
   return inputForm.permissions.includes(permissionKey);
@@ -159,12 +145,8 @@ const onChecked = (permissionKey: string) => {
     inputForm.permissions.push(permissionKey);
   }
   inputForm.permissions.sort((a, b) => {
-    if (a < b) {
-      return -1;
-    }
-    if (a > b) {
-      return 1;
-    }
+    if (a < b) return -1;
+    if (a > b) return 1;
     return 0;
   });
 };
